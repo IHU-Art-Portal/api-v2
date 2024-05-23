@@ -9,6 +9,7 @@ using Theatrical.Dto.ProductionDtos;
 using Theatrical.Dto.ResponseWrapperFolder;
 using Theatrical.Dto.VenueDtos;
 using Theatrical.Services;
+using Theatrical.Services.ProductionService;
 using Theatrical.Services.Security.AuthorizationFilters;
 using Theatrical.Services.Validation;
 
@@ -132,10 +133,13 @@ public class VenuesController : ControllerBase
             productions = productions!
                 .DistinctBy(p => p.Id)
                 .ToList();              //removes double entries from results.
+            var prodFilter = new ProductionSearchFilters
+            {
+                Title = null
+            };
+            // var productionsDto = _service.ProductionsToDto(productions);
 
-            var productionsDto = _service.ProductionsToDto(productions);
-
-            var paginationResult = _productionService.Paginate(page, size, productionsDto);
+            var paginationResult = _productionService.Paginate(page, size, prodFilter, productions);
             
             var response = new ApiResponse<PaginationResult<ProductionDto>>(paginationResult);
 

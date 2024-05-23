@@ -4,7 +4,7 @@ using Theatrical.Dto.ProductionDtos;
 using Theatrical.Services.Pagination;
 using Theatrical.Services.Repositories;
 
-namespace Theatrical.Services;
+namespace Theatrical.Services.ProductionService;
 
 public interface IProductionService
 {
@@ -12,7 +12,7 @@ public interface IProductionService
     List<ProductionDto> ConvertToDto(List<Production> productions);
     ProductionDto ToDto(Production production);
     Task Delete(Production production);
-    PaginationResult<ProductionDto> Paginate(int? page, int? size, List<ProductionDto> productionsDto);
+    PaginationResult<ProductionDto> Paginate(int? page, int? size, ProductionSearchFilters searchFilters, List<Production> productions);
     Task<List<Production>> GetProductionsByTitles(List<string> productionsTitles);
     Task<(List<Production> updatedProductions, List<Production> createdProductions, List<ShortenedProductionDto> responseList)> UpdateOrCreateAndProduceResponseList(List<Production> existingProductions, List<CreateProductionDto> createProductionDtos);
 }
@@ -21,10 +21,13 @@ public class ProductionService : IProductionService
     private readonly IProductionRepository _repo;
     private readonly IPaginationService _pagination;
 
-    public ProductionService(IProductionRepository repo, IPaginationService paginationService)
+    private readonly IProductionFilteringMethods _filtering;
+
+    public ProductionService(IProductionRepository repo, IPaginationService paginationService, IProductionFilteringMethods filteringMethods)
     {
         _repo = repo;
         _pagination = paginationService;
+        _filtering = filteringMethods;
     }
 
     public ProductionDto ToDto(Production production)
@@ -104,9 +107,14 @@ public class ProductionService : IProductionService
         return productionsDto;
     }
 
-    public PaginationResult<ProductionDto> Paginate(int? page, int? size, List<ProductionDto> productionsDto)
+    public PaginationResult<ProductionDto> Paginate(int? page, int? size, ProductionSearchFilters searchFilters, List<Production> productions)
     {
-        var paginationResult = _pagination.GetPaginated(page, size, productionsDto, items =>
+        var titleFiltered = _filtering.TitleFiltering(productions, searchFilters.Title);
+        var producerFiltered = _filtering.ProducerFiltering(productions, searchFilters.Producer);
+
+        var productionDtos = ConvertToDto(producerFiltered);
+
+        var paginationResult = _pagination.GetPaginated(page, size, productionDtos, items =>
         {
             return items.Select(prod => new ProductionDto
             {

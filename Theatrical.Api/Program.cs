@@ -20,6 +20,7 @@ using Theatrical.Services.Email;
 using Theatrical.Services.Pagination;
 using Theatrical.Services.PersonService;
 using Theatrical.Services.PhoneVerification.Twilio;
+using Theatrical.Services.ProductionService;
 using Theatrical.Services.Repositories;
 using Theatrical.Services.Security.AuthorizationFilters;
 using Theatrical.Services.Security.Jwt;
@@ -100,6 +101,7 @@ builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IProductionRepository, ProductionRepository>();
 builder.Services.AddTransient<IProductionValidationService, ProductionValidationService>();
 builder.Services.AddTransient<IProductionService, ProductionService>();
+builder.Services.AddTransient<IProductionFilteringMethods, ProductionFilteringMethods>();
 
 //Event services
 builder.Services.AddTransient<IEventRepository, EventRepository>();
