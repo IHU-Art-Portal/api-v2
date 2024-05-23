@@ -69,6 +69,7 @@ builder.Services.AddDbContext<TheatricalPlaysDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")!));
 
 //services registering
+
 //persons services
 builder.Services.AddTransient<IPersonRepository, PersonRepository>();
 builder.Services.AddTransient<IPersonService, PersonService>();
@@ -137,9 +138,9 @@ builder.Services.AddMemoryCache();
 builder.Services.AddTransient<ICaching, Caching>();
 
 //Account Requests Services
-builder.Services.AddTransient<IAccountRequestRepository, AccountRequestRepository>();
-builder.Services.AddTransient<IAccountRequestService, AccountRequestService>();
-builder.Services.AddTransient<IAccountRequestValidationService, AccountRequestRequestValidationService>();
+// builder.Services.AddTransient<IAccountRequestRepository, AccountRequestRepository>();
+// builder.Services.AddTransient<IAccountRequestService, AccountRequestService>();
+// builder.Services.AddTransient<IAccountRequestValidationService, AccountRequestRequestValidationService>();
 
 //Authorization Filters
 builder.Services.AddTransient<AdminAuthorizationFilter>();
@@ -148,8 +149,8 @@ builder.Services.AddTransient<AnyRoleAuthorizationFilter>();
 builder.Services.AddTransient<ClaimsManagerAuthorizationFilter>();
 
 //Minio service
-builder.Services.AddTransient<IMinioService, MinioService>();
-builder.Services.AddMinio(config.GetValue<string>("MinioService:AccessKey"), config.GetValue<string>("MinioService:SecretKey"));
+// builder.Services.AddTransient<IMinioService, MinioService>();
+// builder.Services.AddMinio(config.GetValue<string>("MinioService:AccessKey"), config.GetValue<string>("MinioService:SecretKey"));
 
 //Assigned Users Services
 builder.Services.AddTransient<IAssignedUserRepository, AssignedUserRepository>();

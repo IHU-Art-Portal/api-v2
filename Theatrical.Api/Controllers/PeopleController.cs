@@ -76,12 +76,13 @@ public class PeopleController : ControllerBase
     /// <param name="eyeColor"></param>
     /// <param name="hairColor"></param>
     /// <param name="languageKnowledge"></param>
+    /// <param name="name"></param>
     /// <returns>TheatricalResponse&lt;PerformersPaginationDto&gt; object containing paginated items.</returns>
     [HttpGet]
     [ProducesResponseType(typeof(PaginationResult<PersonDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse>> GetPeople(int? page, int? size, bool? showAvailable,
         bool? alphabeticalOrder, string? role, int? age, string? height, string? weight, string? eyeColor,
-        string? hairColor, string? languageKnowledge)
+        string? hairColor, string? languageKnowledge, string? name)
     {
         try
         {
@@ -96,6 +97,7 @@ public class PeopleController : ControllerBase
                 EyeColor = eyeColor,
                 HairColor = hairColor,
                 LanguageKnowledge = languageKnowledge,
+                Name = name
             };
             var peopleDto = await _service.GetAndPaginate(page, size, searchFilters);
             

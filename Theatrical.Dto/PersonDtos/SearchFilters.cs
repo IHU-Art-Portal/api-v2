@@ -11,4 +11,6 @@ public class SearchFilters
     public string? EyeColor { get; set; }
     public string? HairColor { get; set; }
     public string? LanguageKnowledge { get; set; }
+
+    public string? Name { get; set; }
 }

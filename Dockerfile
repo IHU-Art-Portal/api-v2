@@ -4,7 +4,7 @@ WORKDIR /app
 EXPOSE 80
 
 # Use the official ASP.NET Core SDK image for building the application
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine3.19 AS build
 WORKDIR /src
 COPY ["Theatrical.Api/Theatrical.Api.csproj", "Theatrical.Api/"]
 COPY ["Theatrical.Data/Theatrical.Data.csproj", "Theatrical.Data/"]
@@ -22,4 +22,5 @@ RUN dotnet publish "Theatrical.Api.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Theatrical.Api.dll"]
+#ENTRYPOINT ["dotnet", "Theatrical.Api.dll"]
+ENTRYPOINT ["/bin/bash", "-c"]
