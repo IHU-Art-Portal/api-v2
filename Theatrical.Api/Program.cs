@@ -25,6 +25,7 @@ using Theatrical.Services.Repositories;
 using Theatrical.Services.Security.AuthorizationFilters;
 using Theatrical.Services.Security.Jwt;
 using Theatrical.Services.Validation;
+using Theatrical.Services.VenueService;
 using EventService = Theatrical.Services.EventService;
 using PersonService = Theatrical.Services.PersonService.PersonService;
 using TokenService = Theatrical.Services.Security.Jwt.TokenService;

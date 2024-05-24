@@ -12,6 +12,7 @@ using Theatrical.Services;
 using Theatrical.Services.ProductionService;
 using Theatrical.Services.Security.AuthorizationFilters;
 using Theatrical.Services.Validation;
+using Theatrical.Services.VenueService;
 
 namespace Theatrical.Api.Controllers;
 
@@ -43,7 +44,7 @@ public class VenuesController : ControllerBase
     /// <param name="size">size capacity for a page</param>
     /// <param name="alphabeticalOrder"></param>
     /// <param name="addressSearch"></param>
-    /// <param name="venueTitle"></param>
+    /// <param name="a"></param>
     /// <param name="availableForClaim"></param>
     /// <returns></returns>
     [HttpGet]

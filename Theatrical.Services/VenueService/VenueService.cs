@@ -2,10 +2,11 @@
 using Theatrical.Dto.Pagination;
 using Theatrical.Dto.ProductionDtos;
 using Theatrical.Dto.VenueDtos;
+using Theatrical.Services.Curators;
 using Theatrical.Services.Pagination;
 using Theatrical.Services.Repositories;
 
-namespace Theatrical.Services;
+namespace Theatrical.Services.VenueService;
 
 public interface IVenueService
 {
@@ -189,15 +190,21 @@ public class VenueService : IVenueService
     {
         if (addressSearch is not null)
         {
+            var normalizedAddress = StringUtilities.RemoveDiacritics(addressSearch).ToLowerInvariant();
+
             venuesDto = venuesDto
-                .Where(v => v.Address != null && v.Address.Contains(addressSearch.Trim(), StringComparison.OrdinalIgnoreCase))
+                .Where(v => v.Address != null 
+                && StringUtilities.RemoveDiacritics(v.Address).ToLowerInvariant().Contains(normalizedAddress))
                 .ToList();
         }
             
         if (venueTitle is not null)
         {
+           var normalizedTitle = StringUtilities.RemoveDiacritics(venueTitle).ToLowerInvariant();
+
             venuesDto = venuesDto
-                .Where(v => v.Title != null && v.Title.Contains(venueTitle.Trim(), StringComparison.OrdinalIgnoreCase))
+                .Where(v => v.Title != null 
+                && StringUtilities.RemoveDiacritics(v.Title).ToLowerInvariant().Contains(normalizedTitle))
                 .ToList();
         }
             
