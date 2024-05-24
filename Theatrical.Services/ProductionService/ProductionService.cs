@@ -110,7 +110,7 @@ public class ProductionService : IProductionService
     public PaginationResult<ProductionDto> Paginate(int? page, int? size, ProductionSearchFilters searchFilters, List<Production> productions)
     {
         var titleFiltered = _filtering.TitleFiltering(productions, searchFilters.Title);
-        var producerFiltered = _filtering.ProducerFiltering(productions, searchFilters.Producer);
+        var producerFiltered = _filtering.ProducerFiltering(titleFiltered, searchFilters.Producer);
 
         var productionDtos = ConvertToDto(producerFiltered);
 
