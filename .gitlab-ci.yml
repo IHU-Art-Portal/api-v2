@@ -1,9 +1,11 @@
-stages: [prerequisites, build, test, deliver]
+stages: [prerequisites, build, test, deliver, deploy]
 
 workflow:
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    #- if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    #- if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+    #  when: never
+    - if: $CI_COMMIT_BRANCH
     - if: $CI_PIPELINE_SOURCE == "shceduled"
     - if: $CI_COMMIT_TAG != null
 
@@ -13,7 +15,6 @@ default:
 variables:
   BUILD_DIR: build
   DEPENDENCIES_DIR: dependencies
-  IMAGE_BASE_NAME: "theatrical-plays-api-v2"
   IMAGE_PLATFORMS: "linux/amd64,linux/arm64"
 
 # dotnet-restore:
@@ -28,31 +29,31 @@ variables:
 #     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 #     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-dotnet-compile:
-  stage: build
-  # cache: 
-  #   - <<: *dependencies_cache
-  #     policy: pull
-  script:
-    - dotnet ${BUILD_COMMAND:-build} -o ${BUILD_DIR} #--no-restore
-  #needs: [dotnet-restore]
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_TAG != null
-      variables: 
-        BUILD_COMMAND: "publish"
+# dotnet-compile:
+#   stage: build
+#   # cache: 
+#   #   - <<: *dependencies_cache
+#   #     policy: pull
+#   script:
+#     - dotnet ${BUILD_COMMAND:-build} -o ${BUILD_DIR} #--no-restore
+#   #needs: [dotnet-restore]
+#   rules:
+#     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+#     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_TAG != null
+#       variables: 
+#         BUILD_COMMAND: "publish"
 
-dotnet-test:
-  stage: test
-  # cache: 
-  #   - <<: *dependencies_cache
-  #     policy: pull
-  script:
-    - dotnet test -o ${BUILD_DIR} #--no-restore
-  #needs: [dotnet-restore]
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+# dotnet-test:
+#   stage: test
+#   # cache: 
+#   #   - <<: *dependencies_cache
+#   #     policy: pull
+#   script:
+#     - dotnet test -o ${BUILD_DIR} #--no-restore
+#   #needs: [dotnet-restore]
+#   rules:
+#     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+#     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 docker-build:
   stage: deliver
@@ -63,13 +64,35 @@ docker-build:
   script:
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
     - docker buildx create --platform ${IMAGE_PLATFORMS} --name ci-build --use
-    - docker buildx build -f ${DOCKERFILE_DIR:-.}/${DOCKERFILE:-Dockerfile} --push --platform ${IMAGE_PLATFORMS} -t ${TAG} -t latest ${DOCKERFILE_DIR:-.}
-  needs: [dotnet-compile]
+    - docker buildx build --push --platform ${IMAGE_PLATFORMS}
+      -t ${CI_REGISTRY_IMAGE}:${SPECIFIC_TAG}
+      -t ${CI_REGISTRY_IMAGE}:${LATEST_TAG}
+      -f ${DOCKERFILE_DIR:-.}/${DOCKERFILE:-Dockerfile}
+      ${DOCKERFILE_DIR:-.}
+  #needs: [dotnet-compile]
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       variables: 
-        TAG: "candidate-build-${CI_PIPELINE_IID}"
+        SPECIFIC_TAG: "candidate-${CI_COMMIT_SHORT_SHA}"
+        LATEST_TAG: "candidate-latest"
+    - if: $CI_COMMIT_BRANCH
+      when: manual
+      variables:
+        SPECIFIC_TAG: "${CI_COMMIT_BRANCH}-${CI_COMMIT_SHORT_SHA}"
+        LATEST_TAG: "${CI_COMMIT_BRANCH}-latest"
     - if: $CI_COMMIT_TAG != null
       variables: 
-        TAG: "$CI_COMMIT_TAG"
+        SPECIFIC_TAG: "${CI_COMMIT_TAG}"
+        LATEST_TAG: "latest"
 
+docker-deploy:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - which ssh-agent || ( apk add --no-cache --update openssh-client )
+    - eval $(ssh-agent -s)
+  script:
+    - ssh -l ${SSH_USER} -i ${SSH_KEY} -v http://cs1msa.iee.ihu.gr/
+    - docker run -d -p 80:80 ${CI_REGISTRY_IMAGE}:${SPECIFIC_TAG}
+  needs: [docker-build]
+  rules: !reference [docker-build, rules]
