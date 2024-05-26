@@ -71,6 +71,8 @@ docker-build:
       ${DOCKERFILE_DIR:-.}
   #needs: [dotnet-compile]
   rules:
+    - if: $SCHEDULED_MIRRORING == "true"
+      when: never
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       variables: 
         SPECIFIC_TAG: "candidate-${CI_COMMIT_SHORT_SHA}"
@@ -91,9 +93,14 @@ docker-deploy:
   before_script:
     - which ssh-agent || ( apk add --no-cache --update openssh-client )
     - eval $(ssh-agent -s)
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh "${SSH_KEY}"
+    - echo -e "Host art-portal-host\n
+      \tHostName cs1msa.iee.ihu.gr\n
+      \tUser ${SSH_USER}\n
+      \tIdentityFile ${SSH_KEY}\n
+      \tStrictHostKeyChecking no\n\n" > ~/.ssh/config
   script:
-    - ssh -l ${SSH_USER} -i ${SSH_KEY} -v http://cs1msa.iee.ihu.gr/
-    - docker run -d -p 80:80 ${CI_REGISTRY_IMAGE}:${SPECIFIC_TAG}
+    - ssh art-portal-host "docker run -d -p 80:80 ${CI_REGISTRY_IMAGE}:${SPECIFIC_TAG}"
   needs: [docker-build]
   rules: !reference [docker-build, rules]
 
@@ -102,7 +109,7 @@ project-mirror-sync:
   image: alpine:latest
   before_script:
     - apk add --no-cache --update curl
-  script:
-    - curl --request POST --header "PRIVATE-TOKEN: ${MIRRORING_TOKEN}" "https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/mirror/pull"
+  script: |
+    curl --request POST --header "PRIVATE-TOKEN: ${MIRRORING_TOKEN}" "https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/mirror/pull"
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule" && $SCHEDULED_MIRRORING == "true"
