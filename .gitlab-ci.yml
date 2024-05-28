@@ -78,7 +78,7 @@ docker-build:
         SPECIFIC_TAG: "candidate-${CI_COMMIT_SHORT_SHA}"
         LATEST_TAG: "candidate-latest"
     - if: $CI_COMMIT_BRANCH
-      when: manual
+      #when: manual
       variables:
         SPECIFIC_TAG: "${CI_COMMIT_BRANCH}-${CI_COMMIT_SHORT_SHA}"
         LATEST_TAG: "${CI_COMMIT_BRANCH}-latest"
@@ -100,7 +100,7 @@ docker-deploy:
       \tIdentityFile ${SSH_KEY}\n
       \tStrictHostKeyChecking no\n\n" > ~/.ssh/config
   script:
-    - ssh art-portal-host "docker run -d -p 80:80 ${CI_REGISTRY_IMAGE}:${SPECIFIC_TAG}"
+    - ssh art-portal-host "docker container stop api-v2 && docker run -d -p 80:80 --rm --name api-v2 ${CI_REGISTRY_IMAGE}:${SPECIFIC_TAG} 'dotnet Theatrical.Api.dll'"
   needs: [docker-build]
   rules: !reference [docker-build, rules]
 
