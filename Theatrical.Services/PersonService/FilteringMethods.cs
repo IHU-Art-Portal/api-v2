@@ -1,5 +1,6 @@
 ﻿using Theatrical.Data.enums;
 using Theatrical.Data.Models;
+using Theatrical.Services.Curators;
 
 namespace Theatrical.Services.PersonService;
 
@@ -14,6 +15,8 @@ public interface IFilteringMethods
     List<Person> RoleFiltering(List<Person> people, string? role);
     List<Person> AgeFiltering(List<Person> people, int? age);
     List<Person> HeightFiltering(List<Person> people, string? height);
+    List<Person> NameFiltering(List<Person> people, string? name);
+
 }
 
 public class FilteringMethods : IFilteringMethods
@@ -102,17 +105,23 @@ public class FilteringMethods : IFilteringMethods
     }
 
     public List<Person> RoleFiltering(List<Person> people, string? role)
+{
+    if (!string.IsNullOrEmpty(role))
     {
-        if (role is not null)
+        var allRoles = role.Split(',', StringSplitOptions.RemoveEmptyEntries);
+        if (allRoles.Any())
         {
             var filteredPeople = people
-                .Where(person => person.Roles != null && person.Roles.Contains(role, StringComparer.OrdinalIgnoreCase))
+                .Where(person => person.Roles != null &&
+                                 person.Roles.Any(r => allRoles.Contains(r, StringComparer.OrdinalIgnoreCase)))
                 .ToList();
 
             return filteredPeople;
         }
-        return people;
     }
+    return people;
+}
+
 
     public List<Person> AgeFiltering(List<Person> people, int? age)
     {
@@ -145,4 +154,23 @@ public class FilteringMethods : IFilteringMethods
 
         return people;
     }
+
+
+    public List<Person> NameFiltering(List<Person> people, string? name)
+    {
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            var normalizedSearchName = StringUtilities.RemoveDiacritics(name).ToLowerInvariant();
+
+            var filteredPeople = people
+                .Where(p => p.Fullname != null && StringUtilities.RemoveDiacritics(p.Fullname).ToLowerInvariant().Contains(normalizedSearchName))
+                .ToList();
+
+            Console.WriteLine($"Filtered by name '{name}': {filteredPeople.Count} results.");
+            return filteredPeople;
+        }
+
+        return people;
+    }
+
 }

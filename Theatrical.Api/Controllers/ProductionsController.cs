@@ -5,6 +5,7 @@ using Theatrical.Dto.Pagination;
 using Theatrical.Dto.ProductionDtos;
 using Theatrical.Dto.ResponseWrapperFolder;
 using Theatrical.Services;
+using Theatrical.Services.ProductionService;
 using Theatrical.Services.Security.AuthorizationFilters;
 using Theatrical.Services.Validation;
 
@@ -98,10 +99,16 @@ public class ProductionsController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(PaginationResult<ProductionDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<ApiResponse>> GetProductions(int? page, int? size)
+    public async Task<ActionResult<ApiResponse>> GetProductions(int? page, int? size, string? title, string? producer)
     {
         try
         {
+            var searchFilters = new ProductionSearchFilters
+            {
+                Title = title,
+                Producer = producer
+            };
+
             var (validation, productions) = await _validation.ValidateAndFetch();
 
             if (!validation.Success)
@@ -110,9 +117,9 @@ public class ProductionsController : ControllerBase
                 return new ObjectResult(errorResponse) { StatusCode = 404 };
             }
 
-            var productionsDto = _service.ConvertToDto(productions);
+            // var productionsDto = _service.ConvertToDto(productions);
 
-            var paginationResult = _service.Paginate(page, size, productionsDto);
+            var paginationResult = _service.Paginate(page, size, searchFilters, productions);
 
             var response = new ApiResponse<PaginationResult<ProductionDto>>(paginationResult);
 

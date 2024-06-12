@@ -110,7 +110,6 @@ public class PersonService : IPersonService
     /// <returns></returns>
     public async Task<PaginationResult<PersonDto>> GetAndPaginate(int? page, int? size, SearchFilters searchFilters)
     {
-        
         List<Person> persons = await _repository.Get();
 
         var claimingStatusOrdered = _filtering.ClaimingStatusOrdering(persons, searchFilters.ShowAvailableAccounts);
@@ -122,9 +121,10 @@ public class PersonService : IPersonService
         var eyeColorFiltered = _filtering.EyeColorFiltering(weightFiltered, searchFilters.EyeColor);
         var hairColorFiltered = _filtering.HairColorFiltering(eyeColorFiltered, searchFilters.HairColor);
         var languageFiltered = _filtering.LanguageFiltering(hairColorFiltered, searchFilters.LanguageKnowledge);
+        var nameFiltered = _filtering.NameFiltering(languageFiltered, searchFilters.Name);
 
-        var paginationResult = PaginateAndProduceDtos(languageFiltered, page, size);
-        
+        var paginationResult = PaginateAndProduceDtos(nameFiltered, page, size);
+
         return paginationResult;
     }
 
