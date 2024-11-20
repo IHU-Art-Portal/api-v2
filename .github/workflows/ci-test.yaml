@@ -35,9 +35,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: >
-            ghcr.io/${{ github.repository_owner | toLowerCase }}/${{ github.repository | toLowerCase }}:latest,
-            ghcr.io/${{ github.repository_owner | toLowerCase }}/${{ github.repository | toLowerCase }}:${{ github.run_number }}
+          tags: ghcr.io/${{ github.repository_owner | toLowerCase }}/${{ github.repository | toLowerCase }}:latest,ghcr.io/${{ github.repository_owner | toLowerCase }}/${{ github.repository | toLowerCase }}:${{ github.run_number }}
           platforms: linux/amd64,linux/arm64
 
   # docker-deploy:
