@@ -55,4 +55,4 @@ jobs:
         env:
           CI_REGISTRY_IMAGE: ${{ secrets.CI_REGISTRY_IMAGE }}
           SPECIFIC_TAG: ${{ env.SPECIFIC_TAG }}
-        run: sshpass -p ${{ secrets.DEPLOYMENT_PWD }} ssh ${{ secrets.DEPLOYMENT_USER }}@${{ secrets.DEPLOYMENT_HOST }} "docker run -d -p 80:80 ghcr.io/${{ env.GITHUB_REPOSITORY_OWNER_PART_SLUG_URL }}/${{ env.GITHUB_REPOSITORY_NAME_PART_SLUG_URL }}:latest"
+        run: ssh ${{ secrets.DEPLOYMENT_USER }}@${{ secrets.DEPLOYMENT_HOST }} "docker run -d -p 80:80 ghcr.io/${{ env.GITHUB_REPOSITORY_OWNER_PART_SLUG_URL }}/${{ env.GITHUB_REPOSITORY_NAME_PART_SLUG_URL }}:latest"
