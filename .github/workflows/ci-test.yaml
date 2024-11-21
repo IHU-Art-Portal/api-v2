@@ -46,7 +46,7 @@ jobs:
   docker-deploy:
     name: Deploy Docker Container
     runs-on: ubuntu-latest
-    needs: docker-build
+    #needs: docker-build
     steps:
       - name: GitHub Slug Action
         uses: rlespinasse/github-slug-action@v5.0.0
