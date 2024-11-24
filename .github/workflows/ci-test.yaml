@@ -54,7 +54,7 @@ jobs:
 
             s/\${EMAIL_ACCOUNT}/${EMAIL_ACCOUNT}/;
             s/\${EMAIL_PWD}/${EMAIL_PWD}/;
-          " appsettings.json
+          " Theatrical.Api/appsettings.json
 
       - name: Build and push image
         uses: docker/build-push-action@v6
