@@ -32,7 +32,30 @@ jobs:
 
       - name: GitHub Slug Action
         uses: rlespinasse/github-slug-action@v5.0.0
-            
+
+      - name: Expand secrets
+        run: |
+          sed -i "
+            s/\${DB_HOST}/${DB_HOST}/;
+            s/\${DB_NAME}/${DB_NAME}/;
+            s/\${DB_USER}/${DB_USER}/;
+            s/\${DB_PWD}/${DB_PWD}/;
+
+            s/\${MINIO_ACCESS_KEY}/${MINIO_ACCESS_KEY}/;
+            s/\${MINIO_SECRET_KEY}/${MINIO_SECRET_KEY}/;
+
+            s/\${STRIPE_SECRET_KEY}/${STRIPE_SECRET_KEY}/;
+            s/\${STRIPE_EP_SECRET}/${STRIPE_EP_SECRET}/;
+
+            s/\${TWILIO_ACCOUNT_ID}/${TWILIO_ACCOUNT_ID}/;
+            s/\${TWILIO_AUTH_TOKEN}/${TWILIO_AUTH_TOKEN}/;
+            s/\${TWILIO_SERVICE_ID}/${TWILIO_SERVICE_ID}/;
+            s/\${TWILIO_RECOVERY_CODE}/${TWILIO_RECOVERY_CODE}/;
+
+            s/\${EMAIL_ACCOUNT}/${EMAIL_ACCOUNT}/;
+            s/\${EMAIL_PWD}/${EMAIL_PWD}/;
+          " appsettings.json
+
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
