@@ -38,24 +38,24 @@ jobs:
       - name: Expand secrets
         run: |
           sed -i "
-            s/\${DB_HOST}/${DB_HOST}/;
-            s/\${DB_NAME}/${DB_NAME}/;
-            s/\${DB_USER}/${DB_USER}/;
-            s/\${DB_PWD}/${DB_PWD}/;
+            s/\${DB_HOST}/${{ secrets.DB_HOST }}/;
+            s/\${DB_NAME}/${{ secrets.DB_NAME }}/;
+            s/\${DB_USER}/${{ secrets.DB_USER }}/;
+            s/\${DB_PWD}/${{ secrets.DB_PWD }}/;
 
-            s/\${MINIO_ACCESS_KEY}/${MINIO_ACCESS_KEY}/;
-            s/\${MINIO_SECRET_KEY}/${MINIO_SECRET_KEY}/;
+            s/\${MINIO_ACCESS_KEY}/${{ secrets.MINIO_ACCESS_KEY }}/;
+            s/\${MINIO_SECRET_KEY}/${{ secrets.MINIO_SECRET_KEY }}/;
 
-            s/\${STRIPE_SECRET_KEY}/${STRIPE_SECRET_KEY}/;
-            s/\${STRIPE_EP_SECRET}/${STRIPE_EP_SECRET}/;
+            s/\${STRIPE_SECRET_KEY}/${{ secrets.STRIPE_SECRET_KEY }}/;
+            s/\${STRIPE_EP_SECRET}/${{ secrets.STRIPE_EP_SECRET }}/;
 
-            s/\${TWILIO_ACCOUNT_ID}/${TWILIO_ACCOUNT_ID}/;
-            s/\${TWILIO_AUTH_TOKEN}/${TWILIO_AUTH_TOKEN}/;
-            s/\${TWILIO_SERVICE_ID}/${TWILIO_SERVICE_ID}/;
-            s/\${TWILIO_RECOVERY_CODE}/${TWILIO_RECOVERY_CODE}/;
+            s/\${TWILIO_ACCOUNT_ID}/${{ secrets.TWILIO_ACCOUNT_ID }}/;
+            s/\${TWILIO_AUTH_TOKEN}/${{ secrets.TWILIO_AUTH_TOKEN }}/;
+            s/\${TWILIO_SERVICE_ID}/${{ secrets.TWILIO_SERVICE_ID }}/;
+            s/\${TWILIO_RECOVERY_CODE}/${{ secrets.TWILIO_RECOVERY_CODE }}/;
 
-            s/\${EMAIL_ACCOUNT}/${EMAIL_ACCOUNT}/;
-            s/\${EMAIL_PWD}/${EMAIL_PWD}/;
+            s/\${EMAIL_ACCOUNT}/${{ secrets.EMAIL_ACCOUNT }}/;
+            s/\${EMAIL_PWD}/${{ secrets.EMAIL_PWD }}/;
           " Theatrical.Api/appsettings.json
 
       - name: Build and push image
@@ -80,4 +80,4 @@ jobs:
         env:
           CI_REGISTRY_IMAGE: ${{ secrets.CI_REGISTRY_IMAGE }}
           SPECIFIC_TAG: ${{ env.SPECIFIC_TAG }}
-        run: sshpass -p "${{ secrets.DEPLOYMENT_PWD }}" ssh ${{ secrets.DEPLOYMENT_USER }}@${{ secrets.DEPLOYMENT_HOST }} -o StrictHostKeyChecking=no "docker stop api-v2; docker run -d -p 80:80 --rm --name api-v2 ghcr.io/${{ env.GITHUB_REPOSITORY_OWNER_PART_SLUG_URL }}/${{ env.GITHUB_REPOSITORY_NAME_PART_SLUG_URL }}:latest"
+        run: sshpass -p "${{ secrets.DEPLOYMENT_PWD }}" ssh ${{ secrets.DEPLOYMENT_USER }}@${{ secrets.DEPLOYMENT_HOST }} -o StrictHostKeyChecking=no "docker stop api-v2; docker run -d -p 80:80 --rm --name api-v2 ghcr.io{ /${secrets.{ } env.GITHUB_REPOSITORY_OWNER_PART_SLUG_URL { }}/${secrets.{ } env.GITHUB_REPOSITORY_NAME_PART_SLUG_URL }}:latest"
