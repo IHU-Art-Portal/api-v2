@@ -20,6 +20,7 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
+        ref: '${{ env.GITHUB_REF }}'
 
       - name: Log in to Github Package Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -65,17 +66,6 @@ jobs:
             ghcr.io/${{ env.GITHUB_REPOSITORY_OWNER_PART_SLUG_URL }}/${{ env.GITHUB_REPOSITORY_NAME_PART_SLUG_URL }}:latest
             ghcr.io/${{ env.GITHUB_REPOSITORY_OWNER_PART_SLUG_URL }}/${{ env.GITHUB_REPOSITORY_NAME_PART_SLUG_URL }}:${{ github.run_number }}
           platforms: linux/amd64,linux/arm64
-          build-args: |
-            STRIPE_SECRET_KEY = ${{ secrets.STRIPE_SECRET_KEY }}
-            STRIPE_EP_SECRET = ${{ secrets.STRIPE_EP_SECRET }}
-            TWILIO_ACCOUNT_ID = ${{ secrets.TWILIO_ACCOUNT_ID }}
-            TWILIO_AUTH_TOKEN = ${{ secrets.TWILIO_AUTH_TOKEN }}
-            TWILIO_SERVICE_ID = ${{ secrets.TWILIO_SERVICE_ID }}
-            TWILIO_RECOVERY_CODE = ${{ secrets.TWILIO_RECOVERY_CODE }}
-            EMAIL_ACCOUNT = ${{ secrets.EMAIL_ACCOUNT }}
-            EMAIL_PWD = ${{ secrets.EMAIL_PWD }}
-            MINIO_ACCESS_KEY = ${{ secrets.MINIO_ACCESS_KEY }}
-            MINIO_SECRET_KEY = ${{ secrets.MINIO_SECRET_KEY }}
 
   docker-deploy:
     name: Deploy Docker Container
