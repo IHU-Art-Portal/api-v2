@@ -80,4 +80,4 @@ jobs:
         env:
           CI_REGISTRY_IMAGE: ${{ secrets.CI_REGISTRY_IMAGE }}
           SPECIFIC_TAG: ${{ env.SPECIFIC_TAG }}
-        run: sshpass -p "${{ secrets.DEPLOYMENT_PWD }}" ssh ${{ secrets.DEPLOYMENT_USER }}@${{ secrets.DEPLOYMENT_HOST }} -o StrictHostKeyChecking=no "docker stop api-v2; docker run -d -p 80:80 --rm --name api-v2 ghcr.io{ /${secrets.{ } env.GITHUB_REPOSITORY_OWNER_PART_SLUG_URL { }}/${secrets.{ } env.GITHUB_REPOSITORY_NAME_PART_SLUG_URL }}:latest"
+        run: sshpass -p "${{ secrets.DEPLOYMENT_PWD }}" ssh ${{ secrets.DEPLOYMENT_USER }}@${{ secrets.DEPLOYMENT_HOST }} -o StrictHostKeyChecking=no "docker stop api-v2; docker run -d -p 80:80 --rm --name api-v2 ghcr.io/${{ env.GITHUB_REPOSITORY_OWNER_PART_SLUG_URL }}/${{ env.GITHUB_REPOSITORY_NAME_PART_SLUG_URL }}:latest"
