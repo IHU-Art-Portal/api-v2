@@ -39,8 +39,8 @@ jobs:
       - name: Expand secrets
         run: |
           sed -i "
-            s/\${DB_HOST}/${{ env.DB_HOST }}/;
-            s/\${DB_NAME}/${{ env.DB_NAME }}/;
+            s/\${DB_HOST}/${{ vars.DB_HOST }}/;
+            s/\${DB_NAME}/${{ vars.DB_NAME }}/;
             s/\${DB_USER}/${{ secrets.DB_USER }}/;
             s/\${DB_PWD}/${{ secrets.DB_PWD }}/;
 
@@ -55,7 +55,7 @@ jobs:
             s/\${TWILIO_SERVICE_ID}/${{ secrets.TWILIO_SERVICE_ID }}/;
             s/\${TWILIO_RECOVERY_CODE}/${{ secrets.TWILIO_RECOVERY_CODE }}/;
 
-            s/\${EMAIL_ACCOUNT}/${{ env.EMAIL_ACCOUNT }}/;
+            s/\${EMAIL_ACCOUNT}/${{ vars.EMAIL_ACCOUNT }}/;
             s/\${EMAIL_PWD}/${{ secrets.EMAIL_PWD }}/;
           " Theatrical.Api/appsettings.json
 
