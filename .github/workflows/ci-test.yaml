@@ -1,0 +1,85 @@
+name: CD Pipeline
+
+on:
+  push:
+    branches:
+      - '*'
+    tags:
+      - '*'
+  #workflow_dispatch:
+  #schedule:
+  #  - cron: '0 0 * * *'  # Schedule for daily runs, adjust as needed
+
+env:
+  IMAGE_PLATFORMS: linux/amd64,linux/arm64
+
+jobs:
+  docker-build:
+    name: Build and push image to Githubs Package Registry
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+        with:
+          ref: '${{ env.GITHUB_REF }}'
+
+      - name: Log in to Github Package Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: GitHub Slug Action
+        uses: rlespinasse/github-slug-action@v5.0.0
+
+      - name: Expand secrets
+        run: |
+          sed -i "
+            s/\${DB_HOST}/${{ vars.DB_HOST }}/;
+            s/\${DB_NAME}/${{ vars.DB_NAME }}/;
+            s/\${DB_USER}/${{ secrets.DB_USER }}/;
+            s/\${DB_PWD}/${{ secrets.DB_PWD }}/;
+
+            s/\${MINIO_ACCESS_KEY}/${{ secrets.MINIO_ACCESS_KEY }}/;
+            s/\${MINIO_SECRET_KEY}/${{ secrets.MINIO_SECRET_KEY }}/;
+
+            s/\${STRIPE_SECRET_KEY}/${{ secrets.STRIPE_SECRET_KEY }}/;
+            s/\${STRIPE_EP_SECRET}/${{ secrets.STRIPE_EP_SECRET }}/;
+
+            s/\${TWILIO_ACCOUNT_ID}/${{ secrets.TWILIO_ACCOUNT_ID }}/;
+            s/\${TWILIO_AUTH_TOKEN}/${{ secrets.TWILIO_AUTH_TOKEN }}/;
+            s/\${TWILIO_SERVICE_ID}/${{ secrets.TWILIO_SERVICE_ID }}/;
+            s/\${TWILIO_RECOVERY_CODE}/${{ secrets.TWILIO_RECOVERY_CODE }}/;
+
+            s/\${EMAIL_ACCOUNT}/${{ vars.EMAIL_ACCOUNT }}/;
+            s/\${EMAIL_PWD}/${{ secrets.EMAIL_PWD }}/;
+          " Theatrical.Api/appsettings.json
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ env.GITHUB_REPOSITORY_OWNER_PART_SLUG_URL }}/${{ env.GITHUB_REPOSITORY_NAME_PART_SLUG_URL }}:latest
+            ghcr.io/${{ env.GITHUB_REPOSITORY_OWNER_PART_SLUG_URL }}/${{ env.GITHUB_REPOSITORY_NAME_PART_SLUG_URL }}:${{ github.run_number }}
+          platforms: linux/amd64,linux/arm64
+
+  docker-deploy:
+    name: Deploy Docker Container
+    environment: production
+    runs-on: ubuntu-latest
+    needs: docker-build
+    steps:
+      - name: GitHub Slug Action
+        uses: rlespinasse/github-slug-action@v5.0.0
+
+      - name: Deploy Docker Container on Remote
+        env:
+          CI_REGISTRY_IMAGE: ${{ secrets.CI_REGISTRY_IMAGE }}
+          SPECIFIC_TAG: ${{ env.SPECIFIC_TAG }}
+        run: sshpass -p "${{ secrets.DEPLOYMENT_PWD }}" ssh ${{ secrets.DEPLOYMENT_USER }}@${{ secrets.DEPLOYMENT_HOST }} -o StrictHostKeyChecking=no "docker stop api-v2; docker run -d -p 80:80 --rm --name api-v2 ghcr.io/${{ env.GITHUB_REPOSITORY_OWNER_PART_SLUG_URL }}/${{ env.GITHUB_REPOSITORY_NAME_PART_SLUG_URL }}:latest"

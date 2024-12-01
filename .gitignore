@@ -38,5 +38,3 @@ msbuild.wrn
 
 #Migrations folder
 **/Migrations/
-
-appsettings.json
